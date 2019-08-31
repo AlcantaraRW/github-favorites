@@ -39,13 +39,15 @@ export const List = styled.FlatList.attrs({
 })``;
 
 export const UserContainer = styled.View`
-  flex: 1;
+  flex-direction: row;
   padding-top: 15px;
   padding-bottom: 20px;
+  justify-content: space-between;
+  align-content: center;
+  align-items: center;
 `;
 
 export const User = styled.View`
-  flex: 1;
   align-items: center;
   flex-direction: row;
 `;
@@ -74,31 +76,6 @@ export const Login = styled.Text`
   line-height: 18px;
   color: #999;
   margin-bottom: 5px;
-`;
-
-export const ButtonsContainer = styled.View`
-  flex: 1;
-  flex-direction: row;
-  margin-top: 10px;
-  justify-content: space-between;
-`;
-
-export const ActionButton = styled(RectButton)`
-  flex: 1;
-  align-self: stretch;
-  border-radius: 4px;
-  background: #7159c1;
-  justify-content: center;
-  align-items: center;
-  height: 30px;
-  margin: 0 5px 0;
-`;
-
-export const ButtonText = styled.Text`
-  font-size: 14px;
-  font-weight: bold;
-  color: #fff;
-  text-transform: uppercase;
 `;
 
 export const RowSeparator = styled.View`

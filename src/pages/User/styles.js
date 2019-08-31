@@ -41,15 +41,13 @@ export const Loader = styled.View`
 
 export const StarredRepos = styled.FlatList.attrs({
   showsVerticalScrollIndicator: false,
-})`
-  margin-top: 20px;
-`;
+})``;
 
 export const Starred = styled.View`
   background: #f5f5f5;
   border-radius: 4px;
   padding: 10px 15px;
-  margin-bottom: 15px;
+  margin-top: 15px;
   flex-direction: row;
   align-items: center;
 `;

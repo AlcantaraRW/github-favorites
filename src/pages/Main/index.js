@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Keyboard, ActivityIndicator } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-community/async-storage';
 import PropTypes from 'prop-types';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -17,9 +18,6 @@ import {
   UserInfo,
   Name,
   Login,
-  ButtonsContainer,
-  ActionButton,
-  ButtonText,
   RowSeparator,
 } from './styles';
 
@@ -41,10 +39,14 @@ class Main extends Component {
   };
 
   async componentDidMount() {
-    const users = await AsyncStorage.getItem('users');
+    const savedUsers = await AsyncStorage.getItem('users');
 
-    if (users) {
-      this.setState({ users: JSON.parse(users) });
+    if (savedUsers) {
+      this.setState(() => {
+        return {
+          users: JSON.parse(savedUsers),
+        };
+      });
     }
   }
 
@@ -53,12 +55,11 @@ class Main extends Component {
 
     if (prevState.users !== users) {
       AsyncStorage.setItem('users', JSON.stringify(users));
-      console.tron.log(users);
     }
   }
 
   handleAddUser = async () => {
-    const { users, newUser } = this.state;
+    const { newUser } = this.state;
 
     if (!newUser) return;
 
@@ -73,10 +74,12 @@ class Main extends Component {
       avatar: response.data.avatar_url,
     };
 
-    this.setState({
-      users: [...users, data],
-      newUser: '',
-      loading: false,
+    this.setState(prevState => {
+      return {
+        users: [...prevState.users, data],
+        newUser: '',
+        loading: false,
+      };
     });
 
     Keyboard.dismiss();
@@ -89,9 +92,13 @@ class Main extends Component {
   };
 
   handleDelete = user => {
-    const { users } = this.state;
-    console.tron.log('user to remove', user);
-    this.setState({ users: users.filter(u => u !== user) });
+    this.setState(prevState => {
+      const newListOfUsers = prevState.users.filter(
+        u => u.login !== user.login,
+      );
+
+      return { users: newListOfUsers };
+    });
   };
 
   render() {
@@ -127,25 +134,19 @@ class Main extends Component {
           ItemSeparatorComponent={() => <RowSeparator />}
           renderItem={({ item }) => (
             <UserContainer>
-              <User>
-                <Avatar source={{ uri: item.avatar }} />
-                <UserInfo>
-                  <Name>{item.name}</Name>
-                  <Login>{item.login}</Login>
-                </UserInfo>
-              </User>
+              <TouchableOpacity onPress={() => this.handleNavigate(item)}>
+                <User>
+                  <Avatar source={{ uri: item.avatar }} />
+                  <UserInfo>
+                    <Name>{item.name}</Name>
+                    <Login>{item.login}</Login>
+                  </UserInfo>
+                </User>
+              </TouchableOpacity>
 
-              <ButtonsContainer>
-                <ActionButton onPress={() => this.handleNavigate(item)}>
-                  <ButtonText>Ver perfil</ButtonText>
-                </ActionButton>
-
-                <ActionButton>
-                  <ButtonText onPress={() => this.handleDelete(item)}>
-                    Remover
-                  </ButtonText>
-                </ActionButton>
-              </ButtonsContainer>
+              <TouchableOpacity onPress={() => this.handleDelete(item)}>
+                <Icon name="remove-circle-outline" size={25} color="#dc3545" />
+              </TouchableOpacity>
             </UserContainer>
           )}
         />
