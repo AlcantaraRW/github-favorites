@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, RefreshControl } from 'react-native';
 import PropTypes from 'prop-types';
 import api from '../../services/api';
 
@@ -34,6 +34,7 @@ class User extends Component {
     user: '',
     loading: false,
     page: 1,
+    refreshing: false,
   };
 
   async componentDidMount() {
@@ -65,7 +66,9 @@ class User extends Component {
         newState.starred = response.data;
       }
 
-      newState.page = page + 1;
+      if (newState.starred.length === 30) {
+        newState.page = page + 1;
+      }
 
       return newState;
     });
@@ -77,8 +80,16 @@ class User extends Component {
     await this.loadStarredRepos(page);
   };
 
+  refresh = async () => {
+    this.setState({ refreshing: false });
+
+    await this.loadStarredRepos(1);
+
+    this.setState({ refreshing: false });
+  };
+
   render() {
-    const { starred, user, loading } = this.state;
+    const { starred, user, loading, refreshing } = this.state;
 
     return (
       <Container>
@@ -98,6 +109,14 @@ class User extends Component {
             keyExtractor={star => String(star.id)}
             onEndReachedThreshold={5}
             onEndReached={this.loadMore}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={this.refresh}
+                colors={['#fff']}
+                progressBackgroundColor="#7159C1"
+              />
+            }
             renderItem={({ item }) => (
               <Starred>
                 <OwnerAvatar source={{ uri: item.owner.avatar_url }} />
