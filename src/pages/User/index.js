@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { ActivityIndicator, RefreshControl } from 'react-native';
 import PropTypes from 'prop-types';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import api from '../../services/api';
 
 import {
@@ -26,6 +27,7 @@ class User extends Component {
   static propTypes = {
     navigation: PropTypes.shape({
       getParam: PropTypes.func,
+      navigate: PropTypes.func,
     }).isRequired,
   };
 
@@ -88,6 +90,13 @@ class User extends Component {
     this.setState({ refreshing: false });
   };
 
+  handleGoToRepo = async repo => {
+    const { navigation } = this.props;
+    const { name, html_url: url } = repo;
+
+    navigation.navigate('Repo', { repo: { name, url } });
+  };
+
   render() {
     const { starred, user, loading, refreshing } = this.state;
 
@@ -118,13 +127,15 @@ class User extends Component {
               />
             }
             renderItem={({ item }) => (
-              <Starred>
-                <OwnerAvatar source={{ uri: item.owner.avatar_url }} />
-                <Info>
-                  <Title>{item.name}</Title>
-                  <Author>{item.owner.login}</Author>
-                </Info>
-              </Starred>
+              <TouchableOpacity onPress={() => this.handleGoToRepo(item)}>
+                <Starred>
+                  <OwnerAvatar source={{ uri: item.owner.avatar_url }} />
+                  <Info>
+                    <Title>{item.name}</Title>
+                    <Author>{item.owner.login}</Author>
+                  </Info>
+                </Starred>
+              </TouchableOpacity>
             )}
           />
         )}
