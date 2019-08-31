@@ -33,6 +33,7 @@ class User extends Component {
     starred: [],
     user: '',
     loading: false,
+    page: 1,
   };
 
   async componentDidMount() {
@@ -41,10 +42,40 @@ class User extends Component {
     const user = navigation.getParam('user');
     this.setState({ user, loading: true });
 
-    const response = await api.get(`/users/${user.login}/starred`);
+    const { page } = this.state;
+    await this.loadStarredRepos(page);
 
-    this.setState({ starred: response.data, loading: false });
+    this.setState({ loading: false });
   }
+
+  loadStarredRepos = async page => {
+    const { navigation } = this.props;
+    const user = navigation.getParam('user');
+
+    const response = await api.get(`/users/${user.login}/starred`, {
+      params: { page },
+    });
+
+    this.setState(prevState => {
+      const newState = {};
+
+      if (page > 1) {
+        newState.starred = [...prevState.starred, ...response.data];
+      } else {
+        newState.starred = response.data;
+      }
+
+      newState.page = page + 1;
+
+      return newState;
+    });
+  };
+
+  loadMore = async () => {
+    const { page } = this.state;
+
+    await this.loadStarredRepos(page);
+  };
 
   render() {
     const { starred, user, loading } = this.state;
@@ -65,8 +96,8 @@ class User extends Component {
           <StarredRepos
             data={starred}
             keyExtractor={star => String(star.id)}
-            onEndReachedThreshold={0.8}
-            onEndReached={() => console.tron.log('END REACHED')}
+            onEndReachedThreshold={5}
+            onEndReached={this.loadMore}
             renderItem={({ item }) => (
               <Starred>
                 <OwnerAvatar source={{ uri: item.owner.avatar_url }} />

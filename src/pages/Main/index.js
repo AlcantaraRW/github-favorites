@@ -59,28 +59,37 @@ class Main extends Component {
   }
 
   handleAddUser = async () => {
-    const { newUser } = this.state;
+    const { newUser, users } = this.state;
 
     if (!newUser) return;
 
+    if (users.map(u => u.login).includes(newUser)) {
+      this.setState({ newUser: '' });
+      return;
+    }
+
     this.setState({ loading: true });
 
-    const response = await api.get(`/users/${newUser}`);
+    try {
+      const response = await api.get(`/users/${newUser}`);
 
-    const data = {
-      name: response.data.name,
-      login: response.data.login,
-      bio: response.data.bio,
-      avatar: response.data.avatar_url,
-    };
-
-    this.setState(prevState => {
-      return {
-        users: [...prevState.users, data],
-        newUser: '',
-        loading: false,
+      const data = {
+        name: response.data.name,
+        login: response.data.login,
+        bio: response.data.bio,
+        avatar: response.data.avatar_url,
       };
-    });
+
+      this.setState(prevState => {
+        return {
+          users: [...prevState.users, data],
+          newUser: '',
+          loading: false,
+        };
+      });
+    } catch (err) {
+      this.setState({ loading: false });
+    }
 
     Keyboard.dismiss();
   };
