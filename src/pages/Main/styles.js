@@ -50,6 +50,7 @@ export const UserContainer = styled.View`
 export const User = styled.View`
   align-items: center;
   flex-direction: row;
+  width: 90%;
 `;
 
 export const Avatar = styled.Image`
@@ -61,10 +62,11 @@ export const Avatar = styled.Image`
 
 export const UserInfo = styled.View`
   margin-left: 10px;
+  max-width: 75%;
 `;
 
 export const Name = styled.Text`
-  flex: 1;
+  /* flex: 1; */
   font-size: 14px;
   color: #333;
   font-weight: bold;

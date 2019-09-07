@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import api from '../../services/api';
+import { translate } from '../../locales';
 import {
   Container,
   Form,
@@ -23,7 +24,7 @@ import {
 
 class Main extends Component {
   static navigationOptions = {
-    title: 'Usuários',
+    title: translate('users'),
   };
 
   static propTypes = {
@@ -71,7 +72,9 @@ class Main extends Component {
 
     if (this.userIsRepeated(users, newUser)) {
       this.setState({ newUser: '' });
-      Alert.alert('Atenção', 'O usuário já foi adicionado!', [{ text: 'OK' }]);
+      Alert.alert(translate('warning'), translate('userAlreadyAdded'), [
+        { text: 'OK' },
+      ]);
       return;
     }
 
@@ -109,16 +112,20 @@ class Main extends Component {
   };
 
   confirmeDeletion = user => {
-    Alert.alert('Confirme', `Remover ${user.login}?`, [
-      {
-        text: 'Cancelar',
-        style: 'cancel',
-      },
-      {
-        text: 'OK',
-        onPress: () => this.handleDelete(user),
-      },
-    ]);
+    Alert.alert(
+      translate('confirm'),
+      translate('removeUser', { userLogin: user.login }),
+      [
+        {
+          text: translate('cancel'),
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => this.handleDelete(user),
+        },
+      ],
+    );
   };
 
   handleDelete = user => {
@@ -139,7 +146,7 @@ class Main extends Component {
           <Input
             autoCorrect={false}
             autoCapitalize="none"
-            placeholder="Adicionar usuário"
+            placeholder={translate('addUser')}
             value={newUser}
             onChangeText={text => this.setState({ newUser: text })}
             returnKeyType="send"
