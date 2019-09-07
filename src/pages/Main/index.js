@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Keyboard, ActivityIndicator } from 'react-native';
+import { Keyboard, ActivityIndicator, Alert } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-community/async-storage';
 import PropTypes from 'prop-types';
@@ -58,13 +58,20 @@ class Main extends Component {
     }
   }
 
+  userIsRepeated = (users, newUser) => {
+    const loginList = users.map(u => u.login.toLowerCase());
+
+    return loginList.includes(newUser.toLowerCase());
+  };
+
   handleAddUser = async () => {
     const { newUser, users } = this.state;
 
     if (!newUser) return;
 
-    if (users.map(u => u.login).includes(newUser)) {
+    if (this.userIsRepeated(users, newUser)) {
       this.setState({ newUser: '' });
+      Alert.alert('Atenção', 'O usuário já foi adicionado!', [{ text: 'OK' }]);
       return;
     }
 
@@ -89,6 +96,7 @@ class Main extends Component {
       });
     } catch (err) {
       this.setState({ loading: false });
+      Alert.alert(err.name, err.message, [{ text: 'OK' }]);
     }
 
     Keyboard.dismiss();
@@ -98,6 +106,19 @@ class Main extends Component {
     const { navigation } = this.props;
 
     navigation.navigate('User', { user });
+  };
+
+  confirmeDeletion = user => {
+    Alert.alert('Confirme', `Remover ${user.login}?`, [
+      {
+        text: 'Cancelar',
+        style: 'cancel',
+      },
+      {
+        text: 'OK',
+        onPress: () => this.handleDelete(user),
+      },
+    ]);
   };
 
   handleDelete = user => {
@@ -153,7 +174,7 @@ class Main extends Component {
                 </User>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => this.handleDelete(item)}>
+              <TouchableOpacity onPress={() => this.confirmeDeletion(item)}>
                 <Icon name="remove-circle-outline" size={25} color="#dc3545" />
               </TouchableOpacity>
             </UserContainer>
