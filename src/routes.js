@@ -3,6 +3,7 @@ import { createAppContainer, createStackNavigator } from 'react-navigation';
 import Main from './pages/Main';
 import User from './pages/User';
 import Repo from './pages/Repo';
+import { MODERATE_BLUE, WHITE } from './styles/colors';
 
 const Routes = createAppContainer(
   createStackNavigator(
@@ -16,9 +17,9 @@ const Routes = createAppContainer(
       headerBackTitleVisible: false,
       defaultNavigationOptions: {
         headerStyle: {
-          backgroundColor: '#7159c1',
+          backgroundColor: MODERATE_BLUE,
         },
-        headerTintColor: '#FFF',
+        headerTintColor: WHITE,
       },
     },
   ),

@@ -21,6 +21,7 @@ import {
   Login,
   RowSeparator,
 } from './styles';
+import { WHITE, BRIGHT_RED } from '../../styles/colors';
 
 export default function Main({ navigation }) {
   const [newUser, setNewUser] = useState('');
@@ -127,9 +128,9 @@ export default function Main({ navigation }) {
           enabled={!loading}
         >
           {loading ? (
-            <ActivityIndicator color="#FFF" />
+            <ActivityIndicator color={WHITE} />
           ) : (
-            <Icon name="add-circle" size={20} color="#fff" />
+            <Icon name="add-circle" size={20} color={WHITE} />
           )}
         </SubmitButton>
       </Form>
@@ -151,7 +152,7 @@ export default function Main({ navigation }) {
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => confirmeDeletion(item)}>
-              <Icon name="remove-circle-outline" size={25} color="#dc3545" />
+              <Icon name="remove-circle-outline" size={25} color={BRIGHT_RED} />
             </TouchableOpacity>
           </UserContainer>
         )}

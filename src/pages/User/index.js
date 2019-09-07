@@ -18,6 +18,7 @@ import {
   Title,
   Author,
 } from './styles';
+import { MODERATE_BLUE, WHITE } from '../../styles/colors';
 
 export default function User({ navigation }) {
   const [user, setUser] = useState('');
@@ -78,7 +79,7 @@ export default function User({ navigation }) {
 
       {loading ? (
         <Loader>
-          <ActivityIndicator color="#7159c1" />
+          <ActivityIndicator color={MODERATE_BLUE} />
         </Loader>
       ) : (
         <StarredRepos
@@ -90,8 +91,8 @@ export default function User({ navigation }) {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={refresh}
-              colors={['#fff']}
-              progressBackgroundColor="#7159C1"
+              colors={[WHITE]}
+              progressBackgroundColor={MODERATE_BLUE}
             />
           }
           renderItem={({ item }) => (

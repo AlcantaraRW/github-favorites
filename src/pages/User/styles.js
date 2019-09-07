@@ -1,4 +1,11 @@
 import styled from 'styled-components/native';
+import {
+  VERY_LIGHT_GRAY,
+  DARKEST_GRAY,
+  DARK_GRAY,
+  VERY_LIGHT_GRAY_MOSTLY_WHITE,
+  VERY_DARK_GRAY,
+} from '../../styles/colors';
 
 export const Container = styled.View`
   flex: 1;
@@ -9,19 +16,19 @@ export const Header = styled.View`
   align-items: center;
   padding-bottom: 20px;
   border-bottom-width: 1px;
-  border-color: #eee;
+  border-color: ${VERY_LIGHT_GRAY};
 `;
 
 export const Avatar = styled.Image`
   width: 100px;
   height: 100px;
   border-radius: 50px;
-  background: #eee;
+  background: ${VERY_LIGHT_GRAY};
 `;
 
 export const Name = styled.Text`
   font-size: 20px;
-  color: #333;
+  color: ${DARKEST_GRAY};
   font-weight: bold;
   margin-top: 10px;
   text-align: center;
@@ -30,7 +37,7 @@ export const Name = styled.Text`
 export const Bio = styled.Text`
   font-size: 14px;
   line-height: 18px;
-  color: #999;
+  color: ${DARK_GRAY};
   margin-top: 5px;
   text-align: center;
 `;
@@ -44,7 +51,7 @@ export const StarredRepos = styled.FlatList.attrs({
 })``;
 
 export const Starred = styled.View`
-  background: #f5f5f5;
+  background: ${VERY_LIGHT_GRAY_MOSTLY_WHITE};
   border-radius: 4px;
   padding: 10px 15px;
   margin-top: 15px;
@@ -56,7 +63,7 @@ export const OwnerAvatar = styled.Image`
   height: 42px;
   width: 42px;
   border-radius: 21px;
-  background: #eee;
+  background: ${VERY_LIGHT_GRAY};
 `;
 
 export const Info = styled.View`
@@ -69,11 +76,11 @@ export const Title = styled.Text.attrs({
 })`
   font-size: 15px;
   font-weight: bold;
-  color: #333;
+  color: ${DARKEST_GRAY};
 `;
 
 export const Author = styled.Text`
   font-size: 13px;
-  color: #666;
+  color: ${VERY_DARK_GRAY};
   margin-top: 2px;
 `;

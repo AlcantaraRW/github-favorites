@@ -1,0 +1,10 @@
+export const MODERATE_BLUE = '#7159c1';
+export const DARK_MODERATE_BLUE = '#3f2f90';
+export const BRIGHT_RED = '#DC3545';
+export const WHITE = '#FFF';
+export const VERY_LIGHT_GRAY_MOSTLY_WHITE = '#F5F5F5';
+export const VERY_LIGHT_GRAY = '#EEE';
+export const DARK_GRAY = '#999';
+export const VERY_DARK_GRAY = '#666';
+export const DARKEST_GRAY = '#333';
+export const LIGHTEST_GRAY = '#EFEFEF';
