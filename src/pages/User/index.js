@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ActivityIndicator, RefreshControl } from 'react-native';
 import PropTypes from 'prop-types';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -19,129 +19,105 @@ import {
   Author,
 } from './styles';
 
-class User extends Component {
-  static navigationOptions = ({ navigation }) => ({
-    title: navigation.getParam('user').login,
-  });
+export default function User({ navigation }) {
+  const [user, setUser] = useState('');
+  const [page, setPage] = useState(1);
+  const [starred, setStarred] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  static propTypes = {
-    navigation: PropTypes.shape({
-      getParam: PropTypes.func,
-      navigate: PropTypes.func,
-    }).isRequired,
-  };
+  async function loadStarredRepos() {
+    const selectedUser = navigation.getParam('user');
 
-  state = {
-    starred: [],
-    user: '',
-    loading: false,
-    page: 1,
-    refreshing: false,
-  };
-
-  async componentDidMount() {
-    const { navigation } = this.props;
-
-    const user = navigation.getParam('user');
-    this.setState({ user, loading: true });
-
-    const { page } = this.state;
-    await this.loadStarredRepos(page);
-
-    this.setState({ loading: false });
-  }
-
-  loadStarredRepos = async page => {
-    const { navigation } = this.props;
-    const user = navigation.getParam('user');
-
-    const response = await api.get(`/users/${user.login}/starred`, {
+    const response = await api.get(`/users/${selectedUser.login}/starred`, {
       params: { page },
     });
 
-    this.setState(prevState => {
-      const newState = {};
+    setStarred(page > 1 ? [...starred, ...response.data] : response.data);
 
-      if (page > 1) {
-        newState.starred = [...prevState.starred, ...response.data];
-      } else {
-        newState.starred = response.data;
-      }
+    if (starred.length === 30) {
+      setPage(page + 1);
+    }
+  }
 
-      if (newState.starred.length === 30) {
-        newState.page = page + 1;
-      }
+  useEffect(() => {
+    setUser(navigation.getParam('user'));
 
-      return newState;
-    });
-  };
+    async function init() {
+      setLoading(true);
+      await loadStarredRepos();
+      setLoading(false);
+    }
 
-  loadMore = async () => {
-    const { page } = this.state;
+    init();
+  }, []);
 
-    await this.loadStarredRepos(page);
-  };
+  async function loadMore() {
+    await loadStarredRepos(page);
+  }
 
-  refresh = async () => {
-    this.setState({ refreshing: false });
-
-    await this.loadStarredRepos(1);
-
-    this.setState({ refreshing: false });
-  };
-
-  handleGoToRepo = async repo => {
-    const { navigation } = this.props;
+  async function handleGoToRepo(repo) {
     const { name, html_url: url } = repo;
 
     navigation.navigate('Repo', { repo: { name, url } });
-  };
-
-  render() {
-    const { starred, user, loading, refreshing } = this.state;
-
-    return (
-      <Container>
-        <Header>
-          <Avatar source={{ uri: user.avatar }} />
-          <Name>{user.name}</Name>
-          {user.bio ? <Bio>{user.bio}</Bio> : null}
-        </Header>
-
-        {loading ? (
-          <Loader>
-            <ActivityIndicator color="#7159c1" />
-          </Loader>
-        ) : (
-          <StarredRepos
-            data={starred}
-            keyExtractor={star => String(star.id)}
-            onEndReachedThreshold={5}
-            onEndReached={this.loadMore}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={this.refresh}
-                colors={['#fff']}
-                progressBackgroundColor="#7159C1"
-              />
-            }
-            renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => this.handleGoToRepo(item)}>
-                <Starred>
-                  <OwnerAvatar source={{ uri: item.owner.avatar_url }} />
-                  <Info>
-                    <Title>{item.name}</Title>
-                    <Author>{item.owner.login}</Author>
-                  </Info>
-                </Starred>
-              </TouchableOpacity>
-            )}
-          />
-        )}
-      </Container>
-    );
   }
+
+  async function refresh() {
+    setRefreshing(false);
+    await loadStarredRepos(1);
+    setRefreshing(false);
+  }
+
+  return (
+    <Container>
+      <Header>
+        <Avatar source={{ uri: user.avatar }} />
+        <Name>{user.name}</Name>
+        {user.bio && <Bio>{user.bio}</Bio>}
+      </Header>
+
+      {loading ? (
+        <Loader>
+          <ActivityIndicator color="#7159c1" />
+        </Loader>
+      ) : (
+        <StarredRepos
+          data={starred}
+          keyExtractor={star => String(star.id)}
+          onEndReachedThreshold={5}
+          onEndReached={loadMore}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={refresh}
+              colors={['#fff']}
+              progressBackgroundColor="#7159C1"
+            />
+          }
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => handleGoToRepo(item)}>
+              <Starred>
+                <OwnerAvatar source={{ uri: item.owner.avatar_url }} />
+                <Info>
+                  <Title>{item.name}</Title>
+                  <Author>{item.owner.login}</Author>
+                </Info>
+              </Starred>
+            </TouchableOpacity>
+          )}
+        />
+      )}
+    </Container>
+  );
 }
 
-export default User;
+User.navigationOptions = ({ navigation }) => ({
+  title: navigation.getParam('user').login,
+});
+
+User.propTypes = {
+  navigation: PropTypes.shape({
+    getParam: PropTypes.func,
+    navigate: PropTypes.func,
+  }).isRequired,
+};

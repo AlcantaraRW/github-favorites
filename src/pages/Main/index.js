@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Keyboard, ActivityIndicator, Alert } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -22,63 +22,46 @@ import {
   RowSeparator,
 } from './styles';
 
-class Main extends Component {
-  static navigationOptions = {
-    title: translate('users'),
-  };
+export default function Main({ navigation }) {
+  const [newUser, setNewUser] = useState('');
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  static propTypes = {
-    navigation: PropTypes.shape({
-      navigate: PropTypes.func,
-    }).isRequired,
-  };
+  useEffect(() => {
+    async function getSavedUsers() {
+      const savedUsers = await AsyncStorage.getItem('users');
 
-  state = {
-    newUser: '',
-    users: [],
-    loading: false,
-  };
-
-  async componentDidMount() {
-    const savedUsers = await AsyncStorage.getItem('users');
-
-    if (savedUsers) {
-      this.setState(() => {
-        return {
-          users: JSON.parse(savedUsers),
-        };
-      });
+      if (savedUsers) {
+        setUsers(JSON.parse(savedUsers));
+      }
     }
-  }
 
-  componentDidUpdate(props, prevState) {
-    const { users } = this.state;
+    getSavedUsers();
+  }, []);
 
-    if (prevState.users !== users) {
-      AsyncStorage.setItem('users', JSON.stringify(users));
-    }
-  }
+  useEffect(() => {
+    AsyncStorage.setItem('users', JSON.stringify(users));
+  }, [users]);
 
-  userIsRepeated = (users, newUser) => {
+  function userIsRepeated() {
     const loginList = users.map(u => u.login.toLowerCase());
 
     return loginList.includes(newUser.toLowerCase());
-  };
+  }
 
-  handleAddUser = async () => {
-    const { newUser, users } = this.state;
-
+  async function handleAddUser() {
     if (!newUser) return;
 
-    if (this.userIsRepeated(users, newUser)) {
-      this.setState({ newUser: '' });
+    if (userIsRepeated(users, newUser)) {
+      setNewUser('');
       Alert.alert(translate('warning'), translate('userAlreadyAdded'), [
         { text: 'OK' },
       ]);
+
       return;
     }
 
-    this.setState({ loading: true });
+    setLoading(true);
 
     try {
       const response = await api.get(`/users/${newUser}`);
@@ -90,28 +73,26 @@ class Main extends Component {
         avatar: response.data.avatar_url,
       };
 
-      this.setState(prevState => {
-        return {
-          users: [...prevState.users, data],
-          newUser: '',
-          loading: false,
-        };
-      });
+      setUsers([...users, data]);
+      setNewUser('');
+      setLoading(false);
     } catch (err) {
-      this.setState({ loading: false });
+      setLoading(false);
       Alert.alert(err.name, err.message, [{ text: 'OK' }]);
     }
 
     Keyboard.dismiss();
-  };
+  }
 
-  handleNavigate = user => {
-    const { navigation } = this.props;
-
+  function handleNavigate(user) {
     navigation.navigate('User', { user });
-  };
+  }
 
-  confirmeDeletion = user => {
+  function handleDelete(user) {
+    setUsers(users.filter(u => u.login !== user.login));
+  }
+
+  function confirmeDeletion(user) {
     Alert.alert(
       translate('confirm'),
       translate('removeUser', { userLogin: user.login }),
@@ -122,74 +103,69 @@ class Main extends Component {
         },
         {
           text: 'OK',
-          onPress: () => this.handleDelete(user),
+          onPress: () => handleDelete(user),
         },
       ],
     );
-  };
-
-  handleDelete = user => {
-    this.setState(prevState => {
-      const newListOfUsers = prevState.users.filter(
-        u => u.login !== user.login,
-      );
-
-      return { users: newListOfUsers };
-    });
-  };
-
-  render() {
-    const { newUser, users, loading } = this.state;
-    return (
-      <Container>
-        <Form>
-          <Input
-            autoCorrect={false}
-            autoCapitalize="none"
-            placeholder={translate('addUser')}
-            value={newUser}
-            onChangeText={text => this.setState({ newUser: text })}
-            returnKeyType="send"
-            onSubmitEditing={this.handleAddUser}
-          />
-          <SubmitButton
-            loading={loading}
-            onPress={this.handleAddUser}
-            enabled={!loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#FFF" />
-            ) : (
-              <Icon name="add-circle" size={20} color="#fff" />
-            )}
-          </SubmitButton>
-        </Form>
-
-        <List
-          data={users}
-          keyExtractor={user => user.login}
-          ItemSeparatorComponent={() => <RowSeparator />}
-          renderItem={({ item }) => (
-            <UserContainer>
-              <TouchableOpacity onPress={() => this.handleNavigate(item)}>
-                <User>
-                  <Avatar source={{ uri: item.avatar }} />
-                  <UserInfo>
-                    <Name>{item.name}</Name>
-                    <Login>{item.login}</Login>
-                  </UserInfo>
-                </User>
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={() => this.confirmeDeletion(item)}>
-                <Icon name="remove-circle-outline" size={25} color="#dc3545" />
-              </TouchableOpacity>
-            </UserContainer>
-          )}
-        />
-      </Container>
-    );
   }
+
+  return (
+    <Container>
+      <Form>
+        <Input
+          autoCorrect={false}
+          autoCapitalize="none"
+          placeholder={translate('addUser')}
+          value={newUser}
+          onChangeText={text => setNewUser(text)}
+          returnKeyType="send"
+          onSubmitEditing={handleAddUser}
+        />
+        <SubmitButton
+          loading={loading}
+          onPress={handleAddUser}
+          enabled={!loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#FFF" />
+          ) : (
+            <Icon name="add-circle" size={20} color="#fff" />
+          )}
+        </SubmitButton>
+      </Form>
+
+      <List
+        data={users}
+        keyExtractor={user => user.login}
+        ItemSeparatorComponent={() => <RowSeparator />}
+        renderItem={({ item }) => (
+          <UserContainer>
+            <TouchableOpacity onPress={() => handleNavigate(item)}>
+              <User>
+                <Avatar source={{ uri: item.avatar }} />
+                <UserInfo>
+                  <Name>{item.name}</Name>
+                  <Login>{item.login}</Login>
+                </UserInfo>
+              </User>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => confirmeDeletion(item)}>
+              <Icon name="remove-circle-outline" size={25} color="#dc3545" />
+            </TouchableOpacity>
+          </UserContainer>
+        )}
+      />
+    </Container>
+  );
 }
 
-export default Main;
+Main.navigationOptions = {
+  title: translate('users'),
+};
+
+Main.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func,
+  }).isRequired,
+};
